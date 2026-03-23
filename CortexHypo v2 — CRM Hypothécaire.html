@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)file:///Users/Julesdemarre/Downloads/crm-v2.html -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CortexHypo v2 — CRM Hypothécaire</title>
+<script src="./CortexHypo v2 — CRM Hypothécaire_files/supabase-js@2"></script>
+<script src="./CortexHypo v2 — CRM Hypothécaire_files/chart.js@4"></script>
+<link href="./CortexHypo v2 — CRM Hypothécaire_files/css2" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f1923;--navy2:#162030;--navy3:#1e2d40;--navy4:#243447;
+  --gold:#c9a84c;--gold2:#e8c76a;--gold-dim:rgba(201,168,76,0.15);
+  --cream:#f5f0e8;--text:#d4cfc6;--text-dim:#7a8494;
+  --green:#3ecf8e;--red:#f06a6a;--blue:#5b8dee;--orange:#f0a050;--purple:#a78bfa;--teal:#2dd4bf;
+  --border:rgba(255,255,255,0.07);--shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,#1a2d42,var(--navy))}
+.auth-box{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:48px 44px;width:420px;max-width:95vw;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.auth-logo{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);margin-bottom:4px}
+.auth-version{font-size:11px;color:var(--gold);opacity:.6;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text-dim);margin-bottom:32px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.auth-tab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s}
+.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.auth-input{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
+.auth-input:focus{border-color:var(--gold)}
+.auth-btn{background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px}
+.auth-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.auth-error{background:rgba(240,106,106,.12);border:1px solid rgba(240,106,106,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);display:none}
+.auth-error.show{display:block}
+.auth-success{background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--green);display:none}
+.auth-success.show{display:block}
+.auth-lock{font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px}
+
+/* LAYOUT */
+#app-screen{display:none}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold)}
+.logo-ver{font-size:10px;color:var(--gold);opacity:.5;letter-spacing:1px}
+.logo span{font-size:11px;color:var(--text-dim);font-weight:300}
+.nav{padding:12px 0;flex:1;overflow-y:auto}
+.nav-section{padding:10px 20px 3px;font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-dim);transition:all .2s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--cream);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:var(--gold-dim)}
+.nav-item .icon{font-size:15px;width:20px;text-align:center}
+.nav-bottom{padding:14px 20px;border-top:1px solid var(--border)}
+.user-email{font-size:11px;color:var(--text-dim);margin-bottom:8px;word-break:break-all}
+.btn-logout{width:100%;background:rgba(240,106,106,.1);border:1px solid rgba(240,106,106,.2);color:var(--red);border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-logout:hover{background:rgba(240,106,106,.2)}
+
+.main{margin-left:230px;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:50;background:var(--navy2);border-bottom:1px solid var(--border);padding:13px 28px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:21px;color:var(--cream)}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all .2s}
+.btn-primary{background:var(--gold);color:var(--navy)}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:rgba(240,106,106,.15);color:var(--red);border:1px solid rgba(240,106,106,.3)}
+.btn-danger:hover{background:rgba(240,106,106,.25)}
+.btn-teal{background:rgba(45,212,191,.15);color:var(--teal);border:1px solid rgba(45,212,191,.3)}
+.btn-teal:hover{background:rgba(45,212,191,.25)}
+
+.page{padding:26px 28px;display:none}
+.page.active{display:block}
+.section-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--cream);margin-bottom:16px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(201,168,76,.3)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-card.teal::before{background:var(--teal)}
+.stat-label{font-size:11px;color:var(--text-dim);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:30px;color:var(--cream)}
+.stat-sub{font-size:11px;color:var(--text-dim);margin-top:3px}
+.stat-trend{font-size:11px;margin-top:4px}
+.trend-up{color:var(--green)}
+.trend-down{color:var(--red)}
+
+/* KANBAN */
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;min-height:400px}
+.kanban-col{min-width:230px;flex-shrink:0;background:var(--navy2);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 200px)}
+.kanban-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.kanban-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.kanban-dot{width:7px;height:7px;border-radius:50%}
+.kanban-count{font-size:11px;background:var(--navy3);padding:2px 7px;border-radius:10px;color:var(--text-dim)}
+.kanban-body{padding:10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
+.kanban-card{background:var(--navy3);border:1px solid var(--border);border-radius:9px;padding:12px;cursor:pointer;transition:all .2s}
+.kanban-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow)}
+.card-name{font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px}
+.card-amount{font-size:12px;color:var(--gold);font-weight:500;margin-bottom:7px}
+.card-meta{display:flex;align-items:center;justify-content:space-between}
+.card-agent{font-size:10px;color:var(--text-dim)}
+.card-date{font-size:10px;color:var(--text-dim)}
+.card-tags{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
+.tag-achat{background:rgba(91,141,238,.2);color:var(--blue)}
+.tag-refi{background:rgba(167,139,250,.2);color:var(--purple)}
+.tag-renou{background:rgba(240,160,80,.2);color:var(--orange)}
+.tag-boss{background:rgba(45,212,191,.2);color:var(--teal)}
+.progress-bar{height:3px;background:var(--navy4);border-radius:2px;margin-top:8px}
+.progress-fill{height:100%;border-radius:2px;background:var(--gold)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.status-badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:500}
+.s-prospect{background:rgba(91,141,238,.15);color:var(--blue)}
+.s-docs{background:rgba(240,160,80,.15);color:var(--orange)}
+.s-soumis{background:rgba(167,139,250,.15);color:var(--purple)}
+.s-approuve{background:rgba(62,207,142,.15);color:var(--green)}
+.s-finance{background:rgba(201,168,76,.15);color:var(--gold)}
+.s-perdu{background:rgba(240,106,106,.15);color:var(--red)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:16px;width:700px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:slideUp .25s ease}
+.modal-sm{width:480px}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:22px 26px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--cream)}
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer}
+.modal-close:hover{color:var(--cream)}
+.modal-body{padding:22px 26px}
+.modal-footer{padding:14px 26px 22px;display:flex;gap:10px;justify-content:flex-end}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color .2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:80px}
+select option{background:var(--navy2)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:7px}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--navy3);border-radius:8px;border:1px solid var(--border)}
+.check-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.check-label{font-size:13px;flex:1}
+.check-label.done{text-decoration:line-through;color:var(--text-dim)}
+.check-status{font-size:10px;padding:2px 7px;border-radius:4px}
+.check-ok{background:rgba(62,207,142,.15);color:var(--green)}
+.check-missing{background:rgba(240,106,106,.15);color:var(--red)}
+
+/* CARDS */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--text-dim);margin-bottom:14px}
+
+/* INTÉGRATION BOSS */
+.boss-status{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:10px;font-size:12px;font-weight:500}
+.boss-connected{background:rgba(62,207,142,.15);color:var(--green)}
+.boss-disconnected{background:rgba(240,106,106,.15);color:var(--red)}
+.boss-dot{width:7px;height:7px;border-radius:50%}
+.boss-dot-on{background:var(--green);animation:pulse 2s infinite}
+.boss-dot-off{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.webhook-url{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--teal);font-family:monospace;word-break:break-all;margin-top:8px}
+.boss-lead-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--navy3);border:1px solid var(--border);border-radius:9px;margin-bottom:8px}
+.boss-lead-new{border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.05)}
+.boss-badge{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(45,212,191,.2);color:var(--teal);font-weight:500}
+
+/* CALCULATEUR */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.calc-result{background:var(--navy3);border:1px solid var(--gold-dim);border-radius:10px;padding:16px;text-align:center}
+.calc-result-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);margin-bottom:4px}
+.calc-result-label{font-size:12px;color:var(--text-dim)}
+.calc-breakdown{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.calc-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+.calc-row:last-child{border-bottom:none;font-weight:600;color:var(--cream)}
+.calc-row span:last-child{color:var(--gold)}
+.amortization-table{max-height:300px;overflow-y:auto;margin-top:14px}
+
+/* COMMISSIONS */
+.commission-card{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--navy3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.commission-info{flex:1}
+.commission-client{font-size:13px;font-weight:600;color:var(--cream)}
+.commission-detail{font-size:11px;color:var(--text-dim);margin-top:2px}
+.commission-amount{font-size:16px;font-weight:600;color:var(--green)}
+
+/* ANALYTICS */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.chart-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px}
+.chart-title{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:14px}
+.chart-wrap{position:relative;height:200px}
+
+/* SÉQUENCES */
+.sequence-item{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.sequence-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sequence-title{font-size:14px;font-weight:600;color:var(--cream)}
+.sequence-steps{display:flex;gap:0;flex-wrap:wrap}
+.seq-step{display:flex;align-items:center;gap:0}
+.seq-dot{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:500;background:var(--navy3);border:1px solid var(--border);color:var(--text-dim)}
+.seq-dot.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.seq-arrow{font-size:12px;color:var(--text-dim);padding:0 4px}
+
+/* PIPELINE SETTINGS */
+.pipeline-stage-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--navy3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.stage-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stage-name{flex:1;font-size:13px;color:var(--cream)}
+.drag-handle{color:var(--text-dim);cursor:grab;font-size:14px}
+
+/* PORTAIL CLIENT */
+.portal-card{background:linear-gradient(135deg,var(--navy3),var(--navy2));border:1px solid var(--gold-dim);border-radius:12px;padding:20px;margin-bottom:14px}
+.portal-url{background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--teal);font-family:monospace;margin-top:8px;display:flex;align-items:center;justify-content:space-between}
+
+/* SETTINGS */
+.settings-section{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.settings-title{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.settings-sub{font-size:12px;color:var(--text-dim);margin-bottom:16px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:13px;color:var(--text)}
+.toggle{position:relative;width:36px;height:20px}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--navy3);border-radius:10px;cursor:pointer;border:1px solid var(--border);transition:.3s}
+.toggle-slider::before{content:'';position:absolute;height:14px;width:14px;left:2px;bottom:2px;background:var(--text-dim);border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--gold);border-color:var(--gold)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px);background:var(--navy)}
+
+/* EMAILS */
+.email-template{background:var(--navy3);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.email-template-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.email-template-title{font-size:14px;font-weight:600;color:var(--cream)}
+.email-preview{font-size:12px;color:var(--text);line-height:1.6}
+
+/* REMINDERS */
+.reminder-list{display:flex;flex-direction:column;gap:9px}
+.reminder-item{display:flex;align-items:center;gap:12px;background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.reminder-content{flex:1}
+.reminder-title{font-size:13px;font-weight:500;color:var(--cream)}
+.reminder-meta{font-size:11px;color:var(--text-dim);margin-top:2px}
+.urgency-badge{font-size:10px;padding:3px 8px;border-radius:10px}
+.urgency-high{background:rgba(240,106,106,.15);color:var(--red)}
+.urgency-med{background:rgba(240,160,80,.15);color:var(--orange)}
+.urgency-low{background:rgba(62,207,142,.15);color:var(--green)}
+
+/* EQUIPE */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.team-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.team-avatar{width:48px;height:48px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 10px;color:var(--gold);font-family:'DM Serif Display',serif}
+.team-name{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:3px}
+.team-role{font-size:11px;color:var(--text-dim);margin-bottom:10px}
+.team-stats{display:flex;justify-content:center;gap:18px}
+.team-stat-val{font-size:16px;font-weight:600;color:var(--gold)}
+.team-stat-label{font-size:10px;color:var(--text-dim)}
+
+/* SEARCH */
+.search-bar{background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:8px 13px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:210px;transition:border-color .2s}
+.search-bar:focus{border-color:var(--gold)}
+
+/* NOTIF */
+.notif{position:fixed;bottom:22px;right:22px;z-index:999;background:var(--navy2);border:1px solid var(--gold);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--cream);transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+.notif.show{transform:translateY(0);opacity:1}
+
+/* MISC */
+.empty-state{text-align:center;padding:40px;color:var(--text-dim)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--navy);border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">CortexHypo</div>
+    <div class="auth-version">VERSION 2.0</div>
+    <div class="auth-sub">CRM Courtier Hypothécaire — Accès sécurisé 🔐</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab(&#39;login&#39;,this)">Connexion</div>
+      <div class="auth-tab" onclick="switchAuthTab(&#39;signup&#39;,this)">Créer un compte</div>
+    </div>
+    <div id="auth-login">
+      <div class="auth-form">
+        <div class="auth-error" id="login-error"></div>
+        <input class="auth-input" type="email" id="login-email" placeholder="Courriel professionnel">
+        <input class="auth-input" type="password" id="login-password" placeholder="Mot de passe" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+        <button class="auth-btn" onclick="doLogin()">Se connecter</button>
+        <div style="text-align:center"><span style="font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline" onclick="doReset()">Mot de passe oublié?</span></div>
+      </div>
+    </div>
+    <div id="auth-signup" style="display:none">
+      <div class="auth-form">
+        <div class="auth-error" id="signup-error"></div>
+        <div class="auth-success" id="signup-success"></div>
+        <input class="auth-input" type="email" id="signup-email" placeholder="Courriel professionnel">
+        <input class="auth-input" type="password" id="signup-password" placeholder="Mot de passe (min. 8 caractères)">
+        <input class="auth-input" type="password" id="signup-confirm" placeholder="Confirmer le mot de passe">
+        <button class="auth-btn" onclick="doSignup()">Créer mon compte</button>
+      </div>
+    </div>
+    <div class="auth-lock">🔒 Connexion chiffrée · Données sécurisées par Supabase</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>CortexHypo <span class="logo-ver">v2</span></h1>
+      <span>CRM Hypothécaire Sécurisé</span>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="nav(&#39;dashboard&#39;,this)"><span class="icon">📊</span>Tableau de bord</div>
+      <div class="nav-item" onclick="nav(&#39;pipeline&#39;,this)"><span class="icon">🗂️</span>Pipeline</div>
+      <div class="nav-item" onclick="nav(&#39;clients&#39;,this)"><span class="icon">👥</span>Clients</div>
+      <div class="nav-section">Outils</div>
+      <div class="nav-item" onclick="nav(&#39;boss&#39;,this)"><span class="icon">🔗</span>Intégration BOSS</div>
+      <div class="nav-item" onclick="nav(&#39;calculateur&#39;,this)"><span class="icon">🧮</span>Calculateur</div>
+      <div class="nav-item" onclick="nav(&#39;commissions&#39;,this)"><span class="icon">💰</span>Commissions</div>
+      <div class="nav-item" onclick="nav(&#39;analytics&#39;,this)"><span class="icon">📈</span>Analytique</div>
+      <div class="nav-section">Automatisation</div>
+      <div class="nav-item" onclick="nav(&#39;sequences&#39;,this)"><span class="icon">⚡</span>Séquences auto</div>
+      <div class="nav-item" onclick="nav(&#39;rappels&#39;,this)"><span class="icon">🔔</span>Rappels</div>
+      <div class="nav-item" onclick="nav(&#39;emails&#39;,this)"><span class="icon">✉️</span>Modèles emails</div>
+      <div class="nav-section">Équipe &amp; Config</div>
+      <div class="nav-item" onclick="nav(&#39;equipe&#39;,this)"><span class="icon">🏢</span>Mon équipe</div>
+      <div class="nav-item" onclick="nav(&#39;settings&#39;,this)"><span class="icon">⚙️</span>Paramètres</div>
+    </nav>
+    <div class="nav-bottom">
+      <div class="user-email" id="user-email-display">—</div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Tableau de bord</div>
+      <div class="topbar-actions">
+        <input class="search-bar" type="text" placeholder="🔍 Rechercher..." oninput="handleSearch(this.value)">
+        <button class="btn btn-primary" onclick="openNewDossier()">+ Nouveau dossier</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card gold"><div class="stat-label">Dossiers actifs</div><div class="stat-value" id="s-actifs">—</div><div class="stat-sub">En traitement</div></div>
+        <div class="stat-card green"><div class="stat-label">Approuvés</div><div class="stat-value" id="s-approuves">—</div><div class="stat-sub">Ce mois 🎉</div></div>
+        <div class="stat-card teal"><div class="stat-label">Leads BOSS</div><div class="stat-value" id="s-boss">—</div><div class="stat-sub">Nouvelles entrées</div></div>
+        <div class="stat-card purple"><div class="stat-label">Commissions</div><div class="stat-value" id="s-commissions">—</div><div class="stat-sub">Total estimé</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="section-title">Activité récente</div>
+          <div id="recent-activity"></div>
+        </div>
+        <div>
+          <div class="section-title">Rappels urgents</div>
+          <div id="urgent-reminders"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="page" id="page-pipeline">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title" style="margin:0">Pipeline des dossiers</div>
+        <button class="btn btn-ghost btn-sm" onclick="nav(&#39;settings&#39;,document.querySelector(&#39;[onclick*=settings]&#39;))">⚙️ Configurer les étapes</button>
+      </div>
+      <div class="kanban" id="kanban-board"></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="table-wrap">
+        <table><thead><tr><th>Client</th><th>Type</th><th>Montant</th><th>Statut</th><th>Agent</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="clients-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BOSS INTEGRATION -->
+    <div class="page" id="page-boss">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="settings-section">
+          <div class="settings-title">Connexion BOSS</div>
+          <div class="settings-sub">Entrez votre clé API BOSS pour synchroniser les leads en temps réel</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div id="boss-status-badge" class="boss-status boss-disconnected"><div class="boss-dot boss-dot-off"></div>Non connecté</div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Clé API BOSS</label>
+            <input type="password" id="boss-api-key" placeholder="Entrez votre clé API BOSS..." value="">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label>URL de votre instance BOSS</label>
+            <input type="text" id="boss-url" placeholder="https://votre-cabinet.boss.ca">
+          </div>
+          <button class="btn btn-primary" onclick="saveBossConfig()">🔗 Connecter BOSS</button>
+          <button class="btn btn-ghost" style="margin-left:8px" onclick="testBossConnection()">🧪 Tester</button>
+        </div>
+        <div class="settings-section">
+          <div class="settings-title">Webhook — Recevoir les leads BOSS</div>
+          <div class="settings-sub">Collez cette URL dans votre configuration BOSS pour recevoir les notifications de nouveaux leads automatiquement</div>
+          <div class="webhook-url" id="webhook-url-display">https://votre-crm.vercel.app/api/boss-webhook</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="copyWebhook()">📋 Copier l'URL</button>
+          <div class="divider"></div>
+          <div class="settings-title" style="font-size:13px;margin-bottom:8px">Données à synchroniser</div>
+          <div class="toggle-row"><span class="toggle-label">Nouveaux leads</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+          <div class="toggle-row"><span class="toggle-label">Mises à jour de statut</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+          <div class="toggle-row"><span class="toggle-label">Notifications push</span><label class="toggle"><input type="checkbox"><div class="toggle-slider"></div></label></div>
+        </div>
+      </div>
+      <div class="section-title">Leads reçus via BOSS</div>
+      <div id="boss-leads-list">
+        <div class="boss-lead-item boss-lead-new">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--cream)">Marc Levasseur</div>
+            <div style="font-size:11px;color:var(--text-dim)">Achat · 485 000 $ · il y a 2 heures</div>
+          </div>
+          <span class="boss-badge">🆕 Nouveau</span>
+          <button class="btn btn-teal btn-sm" onclick="importBossLead({prenom:&#39;Marc&#39;,nom:&#39;Levasseur&#39;,montant:&#39;485 000 $&#39;,type:&#39;achat&#39;})">Importer</button>
+        </div>
+        <div class="boss-lead-item">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--cream)">Isabelle Roy</div>
+            <div style="font-size:11px;color:var(--text-dim)">Refinancement · 310 000 $ · hier</div>
+          </div>
+          <span class="tag tag-achat">Importé</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALCULATEUR -->
+    <div class="page" id="page-calculateur">
+      <div class="calc-grid">
+        <div>
+          <div class="card">
+            <div class="card-title">Paramètres</div>
+            <div class="card-sub">Calculez le paiement mensuel</div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Montant de l'hypothèque ($)</label>
+              <input type="number" id="c-montant" value="400000" oninput="calcMortgage()">
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Taux d'intérêt annuel (%)</label>
+              <input type="number" id="c-taux" value="5.5" step="0.1" oninput="calcMortgage()">
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Période d'amortissement (ans)</label>
+              <select id="c-amort" onchange="calcMortgage()">
+                <option value="10">10 ans</option><option value="15">15 ans</option>
+                <option value="20">20 ans</option><option value="25" selected="">25 ans</option><option value="30">30 ans</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Fréquence de paiement</label>
+              <select id="c-freq" onchange="calcMortgage()">
+                <option value="12">Mensuel</option>
+                <option value="26">Bi-hebdomadaire</option>
+                <option value="52">Hebdomadaire</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mise de fonds ($)</label>
+              <input type="number" id="c-mdf" value="80000" oninput="calcMortgage()">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="three-col" style="margin-bottom:14px">
+            <div class="calc-result"><div class="calc-result-val" id="r-paiement">—</div><div class="calc-result-label">Paiement mensuel</div></div>
+            <div class="calc-result"><div class="calc-result-val" id="r-total">—</div><div class="calc-result-label">Total payé</div></div>
+            <div class="calc-result"><div class="calc-result-val" id="r-interet">—</div><div class="calc-result-label">Total intérêts</div></div>
+          </div>
+          <div class="calc-breakdown" id="calc-breakdown"></div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveToDossier()">💾 Sauvegarder dans un dossier</button>
+            <button class="btn btn-ghost btn-sm" onclick="printCalc()">🖨️ Imprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMISSIONS -->
+    <div class="page" id="page-commissions">
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="stat-card green"><div class="stat-label">Total estimé</div><div class="stat-value" id="comm-total">—</div><div class="stat-sub">Tous dossiers financés</div></div>
+        <div class="stat-card gold"><div class="stat-label">En attente</div><div class="stat-value" id="comm-pending">—</div><div class="stat-sub">Dossiers approuvés</div></div>
+        <div class="stat-card blue"><div class="stat-label">Taux moyen</div><div class="stat-value" id="comm-rate">1.0%</div><div class="stat-sub">Par dossier</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="section-title">Commissions par dossier</div>
+          <div id="commissions-list"></div>
+        </div>
+        <div>
+          <div class="section-title">Paramètres de commission</div>
+          <div class="settings-section">
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Taux de commission (%)</label>
+              <input type="number" id="comm-taux-input" value="1.0" step="0.05" placeholder="1.0">
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Bonus d'approbation ($)</label>
+              <input type="number" id="comm-bonus" value="0" placeholder="0">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="saveCommSettings()">💾 Sauvegarder</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="stats-grid">
+        <div class="stat-card gold"><div class="stat-label">Volume total</div><div class="stat-value" id="a-volume">—</div><div class="stat-sub">Hypothèques en cours</div></div>
+        <div class="stat-card green"><div class="stat-label">Taux conversion</div><div class="stat-value" id="a-conv">—</div><div class="stat-sub">Prospect → Financé</div></div>
+        <div class="stat-card blue"><div class="stat-label">Délai moyen</div><div class="stat-value" id="a-delai">—</div><div class="stat-sub">Prospect à financé</div></div>
+        <div class="stat-card purple"><div class="stat-label">Dossiers / mois</div><div class="stat-value" id="a-dpm">—</div><div class="stat-sub">Moyenne</div></div>
+      </div>
+      <div class="analytics-grid">
+        <div class="chart-card"><div class="chart-title">Dossiers par statut</div><div class="chart-wrap"><canvas id="chart-statuts"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Types de demandes</div><div class="chart-wrap"><canvas id="chart-types"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Dossiers par agent</div><div class="chart-wrap"><canvas id="chart-agents"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Volume mensuel ($)</div><div class="chart-wrap"><canvas id="chart-volume"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- SÉQUENCES -->
+    <div class="page" id="page-sequences">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div class="section-title" style="margin:0">Séquences de suivi automatique</div>
+        <button class="btn btn-primary" onclick="openNewSequence()">+ Nouvelle séquence</button>
+      </div>
+      <div id="sequences-list">
+        <div class="sequence-item">
+          <div class="sequence-header">
+            <div>
+              <div class="sequence-title">🎯 Nouveau prospect</div>
+              <div style="font-size:11px;color:var(--text-dim)">Déclenché quand un lead entre au statut "Prospect"</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="status-badge s-approuve">Active</span>
+              <button class="btn btn-ghost btn-sm">⚙️</button>
+            </div>
+          </div>
+          <div class="sequence-steps">
+            <div class="seq-step"><div class="seq-dot active">J+0 · Email bienvenue</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot active">J+1 · SMS suivi</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+3 · Demande docs</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+7 · Relance</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+14 · Appel</div></div>
+          </div>
+        </div>
+        <div class="sequence-item">
+          <div class="sequence-header">
+            <div>
+              <div class="sequence-title">✅ Dossier approuvé</div>
+              <div style="font-size:11px;color:var(--text-dim)">Déclenché quand un dossier passe à "Approuvé"</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="status-badge s-approuve">Active</span>
+              <button class="btn btn-ghost btn-sm">⚙️</button>
+            </div>
+          </div>
+          <div class="sequence-steps">
+            <div class="seq-step"><div class="seq-dot active">J+0 · Email félicitations</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+30 · Vérification</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+60 · Demande référence</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+365 · Renouvellement</div></div>
+          </div>
+        </div>
+        <div class="sequence-item">
+          <div class="sequence-header">
+            <div>
+              <div class="sequence-title">📂 Documents manquants</div>
+              <div style="font-size:11px;color:var(--text-dim)">Relances automatiques si docs incomplets après 48h</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="status-badge s-docs">En pause</span>
+              <button class="btn btn-ghost btn-sm">⚙️</button>
+            </div>
+          </div>
+          <div class="sequence-steps">
+            <div class="seq-step"><div class="seq-dot">J+2 · 1ère relance email</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+4 · Relance SMS</div><div class="seq-arrow">→</div></div>
+            <div class="seq-step"><div class="seq-dot">J+7 · Appel direct</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAPPELS -->
+    <div class="page" id="page-rappels">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <div class="section-title" style="margin:0">Rappels &amp; Tâches</div>
+        <button class="btn btn-primary" onclick="openNewRappel()">+ Nouveau rappel</button>
+      </div>
+      <div class="reminder-list" id="reminder-list"></div>
+    </div>
+
+    <!-- EMAILS -->
+    <div class="page" id="page-emails">
+      <div class="section-title">Modèles d'emails pré-rédigés</div>
+      <div id="email-templates-list"></div>
+    </div>
+
+    <!-- ÉQUIPE -->
+    <div class="page" id="page-equipe">
+      <div class="section-title">Mon équipe</div>
+      <div class="team-grid" id="team-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="section-title">Paramètres</div>
+      <div class="settings-section">
+        <div class="settings-title">Étapes du pipeline</div>
+        <div class="settings-sub">Personnalisez les étapes de votre pipeline de dossiers</div>
+        <div id="pipeline-stages-config">
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-color-dot" style="background:#5b8dee"></div><div class="stage-name">Prospect</div><button class="btn btn-ghost btn-sm">✏️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-color-dot" style="background:#f0a050"></div><div class="stage-name">Documents en attente</div><button class="btn btn-ghost btn-sm">✏️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-color-dot" style="background:#a78bfa"></div><div class="stage-name">Soumis au prêteur</div><button class="btn btn-ghost btn-sm">✏️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-color-dot" style="background:#3ecf8e"></div><div class="stage-name">Approuvé</div><button class="btn btn-ghost btn-sm">✏️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-color-dot" style="background:#c9a84c"></div><div class="stage-name">Financé</div><button class="btn btn-ghost btn-sm">✏️</button></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showNotif(&#39;Fonctionnalité disponible dans la prochaine mise à jour!&#39;)">+ Ajouter une étape</button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Champs personnalisés</div>
+        <div class="settings-sub">Ajoutez vos propres champs aux fiches clients</div>
+        <div id="custom-fields-list">
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-name">Numéro de dossier interne</div><span style="font-size:11px;color:var(--text-dim)">Texte</span><button class="btn btn-danger btn-sm">🗑️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-name">Prêteur cible</div><span style="font-size:11px;color:var(--text-dim)">Texte</span><button class="btn btn-danger btn-sm">🗑️</button></div>
+          <div class="pipeline-stage-item"><span class="drag-handle">⠿</span><div class="stage-name">Score de crédit approximatif</div><span style="font-size:11px;color:var(--text-dim)">Nombre</span><button class="btn btn-danger btn-sm">🗑️</button></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="openNewField()">+ Ajouter un champ</button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Notifications</div>
+        <div class="settings-sub">Configurez quand vous recevez des alertes</div>
+        <div class="toggle-row"><span class="toggle-label">Nouveau lead BOSS reçu</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Dossier approuvé</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Documents complets</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Rappel en retard</span><label class="toggle"><input type="checkbox" checked=""><div class="toggle-slider"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Rapport hebdomadaire par email</span><label class="toggle"><input type="checkbox"><div class="toggle-slider"></div></label></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Portail client</div>
+        <div class="settings-sub">Lien unique à envoyer à vos clients pour qu'ils soumettent leurs documents</div>
+        <div class="portal-url">
+          <span>https://votre-crm.vercel.app/portail/[token-client]</span>
+          <button class="btn btn-ghost btn-sm" onclick="showNotif(&#39;Portail client — disponible dans la prochaine mise à jour!&#39;)">Générer</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL DOSSIER -->
+<div class="modal-overlay" id="modal-dossier">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-dossier-title">Nouveau dossier</div>
+      <button class="modal-close" onclick="closeModal(&#39;modal-dossier&#39;)">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(&#39;info&#39;,this)">Informations</div>
+        <div class="tab" onclick="switchTab(&#39;docs&#39;,this)">Documents</div>
+        <div class="tab" onclick="switchTab(&#39;finance&#39;,this)">Finances</div>
+        <div class="tab" onclick="switchTab(&#39;notes&#39;,this)">Notes</div>
+      </div>
+      <div class="tab-content active" id="tab-info">
+        <div class="form-grid">
+          <div class="form-group"><label>Prénom</label><input type="text" id="f-prenom" placeholder="Jean"></div>
+          <div class="form-group"><label>Nom</label><input type="text" id="f-nom" placeholder="Tremblay"></div>
+          <div class="form-group"><label>Courriel</label><input type="email" id="f-email" placeholder="jean@email.com"></div>
+          <div class="form-group"><label>Téléphone</label><input type="tel" id="f-tel" placeholder="514-555-0000"></div>
+          <div class="form-group"><label>Type de demande</label>
+            <select id="f-type"><option value="achat">Achat</option><option value="refi">Refinancement</option><option value="renou">Renouvellement</option></select>
+          </div>
+          <div class="form-group"><label>Statut</label>
+            <select id="f-statut"><option value="prospect">Prospect</option><option value="docs">Docs en attente</option><option value="soumis">Soumis prêteur</option><option value="approuve">Approuvé</option><option value="finance">Financé</option><option value="perdu">Perdu</option></select>
+          </div>
+          <div class="form-group"><label>Agent responsable</label>
+            <select id="f-agent"><option>Marie Côté</option><option>Louis Bergeron</option><option>Sophie Lavoie</option></select>
+          </div>
+          <div class="form-group"><label>Source</label>
+            <select id="f-source"><option value="manuel">Manuel</option><option value="boss">BOSS</option><option value="referral">Référence</option><option value="web">Site web</option><option value="reseau">Réseau</option></select>
+          </div>
+          <div class="form-group full"><label>Adresse de la propriété</label><input type="text" id="f-adresse" placeholder="123 rue Principale, Montréal, QC"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-docs"><div class="checklist" id="docs-checklist"></div></div>
+      <div class="tab-content" id="tab-finance">
+        <div class="form-grid">
+          <div class="form-group"><label>Montant hypothèque ($)</label><input type="text" id="f-montant" placeholder="350 000"></div>
+          <div class="form-group"><label>Mise de fonds ($)</label><input type="text" id="f-mdf" placeholder="70 000"></div>
+          <div class="form-group"><label>Revenu annuel brut ($)</label><input type="text" id="f-revenu" placeholder="85 000"></div>
+          <div class="form-group"><label>Taux obtenu (%)</label><input type="text" id="f-taux" placeholder="5.49"></div>
+          <div class="form-group"><label>Amortissement (ans)</label><select id="f-amort"><option value="25" selected="">25 ans</option><option value="20">20 ans</option><option value="30">30 ans</option></select></div>
+          <div class="form-group"><label>Prêteur</label><input type="text" id="f-preteur" placeholder="Ex: TD, RBC, Desjardins..."></div>
+          <div class="form-group"><label>Commission estimée ($)</label><input type="text" id="f-commission" placeholder="Auto-calculée"></div>
+          <div class="form-group"><label>Numéro dossier interne</label><input type="text" id="f-dossier-no" placeholder="DOS-2026-001"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-notes">
+        <div class="form-group"><label>Notes internes</label><textarea id="f-notes" placeholder="Observations sur le dossier, conditions particulières, historique des échanges..."></textarea></div>
+        <div class="form-group" style="margin-top:12px"><label>Prochain suivi</label><input type="date" id="f-next-followup"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal(&#39;modal-dossier&#39;)">Annuler</button>
+      <button class="btn btn-primary" id="btn-save-dossier" onclick="saveDossier()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RAPPEL -->
+<div class="modal-overlay" id="modal-rappel">
+  <div class="modal modal-sm">
+    <div class="modal-header"><div class="modal-title">Nouveau rappel</div><button class="modal-close" onclick="closeModal(&#39;modal-rappel&#39;)">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Titre</label><input type="text" id="r-titre" placeholder="Ex: Relancer client pour documents manquants"></div>
+        <div class="form-group"><label>Date</label><input type="date" id="r-date"></div>
+        <div class="form-group"><label>Urgence</label><select id="r-urgence"><option value="high">🔴 Urgent</option><option value="med" selected="">🟠 Moyen</option><option value="low">🟢 Normal</option></select></div>
+        <div class="form-group full"><label>Dossier concerné</label><select id="r-dossier"><option value="">— Aucun —</option></select></div>
+        <div class="form-group full"><label>Note</label><textarea id="r-note" placeholder="Détails supplémentaires..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal(&#39;modal-rappel&#39;)">Annuler</button>
+      <button class="btn btn-primary" id="btn-save-rappel" onclick="saveRappel()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EMAIL -->
+<div class="modal-overlay" id="modal-email">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="email-modal-title">Aperçu email</div><button class="modal-close" onclick="closeModal(&#39;modal-email&#39;)">×</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px"><label>Sujet</label><input type="text" id="email-subject-display" readonly=""></div>
+      <div class="form-group"><label>Corps de l'email</label><textarea id="email-body-display" style="min-height:220px"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal(&#39;modal-email&#39;)">Fermer</button>
+      <button class="btn btn-primary" onclick="copyEmail()">📋 Copier</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"><span id="notif-text"></span></div>
+
+<script>
+const SUPA_URL='https://nzddawscqgzwzyhqtanu.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56ZGRhd3NjcWd6d3p5aHF0YW51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzc3NzEsImV4cCI6MjA4OTg1Mzc3MX0.5e2L4ns5fjjp4Oj6e3v8PrK10gGaPFM5P0pe-vAH_xM';
+const{createClient}=supabase;
+const sb=createClient(SUPA_URL,SUPA_KEY);
+
+let currentUser=null,dossiers=[],rappels=[],editingId=null;
+let commTaux=1.0;
+
+const STATUTS={
+  prospect:{label:'Prospect',cls:'s-prospect',dot:'#5b8dee'},
+  docs:{label:'Docs en attente',cls:'s-docs',dot:'#f0a050'},
+  soumis:{label:'Soumis prêteur',cls:'s-soumis',dot:'#a78bfa'},
+  approuve:{label:'Approuvé',cls:'s-approuve',dot:'#3ecf8e'},
+  finance:{label:'Financé',cls:'s-finance',dot:'#c9a84c'},
+  perdu:{label:'Perdu',cls:'s-perdu',dot:'#f06a6a'},
+};
+const DOCS_REQUIS=['Talons de paie (3 derniers)','Avis de cotisation (2 dernières années)','Relevés bancaires (3 derniers mois)',"Pièce d'identité (2 pièces)",'Offre d\'achat signée','Preuve de mise de fonds','T4 / T1 (2 dernières années)','Lettre d\'emploi','Contrat de vente / MLS'];
+const EQUIPE=[{nom:'Marie Côté',initiale:'MC',role:'Courtière principale'},{nom:'Louis Bergeron',initiale:'LB',role:'Courtier associé'},{nom:'Sophie Lavoie',initiale:'SL',role:'Adjointe hypothécaire'}];
+const EMAIL_TEMPLATES=[
+  {titre:'👋 Bienvenue — Nouveau client',sujet:'Bienvenue chez [Cabinet] — Vos prochaines étapes',corps:`Bonjour [Prénom],\n\nMerci de nous faire confiance pour votre projet hypothécaire!\n\nVoici ce qui vous attend :\n1. Vous recevrez une liste personnalisée des documents requis\n2. Nous planifierons un appel de 20 minutes\n3. Nous analyserons les meilleures options pour vous\n\nCordialement,\n[Votre nom]\nCourtier hypothécaire agréé`},
+  {titre:'📂 Demande de documents',sujet:'Documents requis pour votre dossier hypothécaire',corps:`Bonjour [Prénom],\n\nPour compléter votre demande, j'ai besoin des documents suivants :\n\n✅ Talons de paie (3 derniers)\n✅ Avis de cotisation (2 dernières années)\n✅ Relevés bancaires (3 derniers mois)\n✅ 2 pièces d'identité\n✅ Preuve de mise de fonds\n✅ T4 / T1 (2 dernières années)\n\nDate limite : [Date]\n\n[Votre nom]`},
+  {titre:'🏦 Dossier soumis',sujet:'Votre dossier est en analyse — Mise à jour',corps:`Bonjour [Prénom],\n\nVotre dossier a été soumis à [Prêteur] aujourd'hui.\nDélai d'analyse : 3 à 5 jours ouvrables.\n\nJe vous contacte dès que nous avons une réponse!\n\n[Votre nom]`},
+  {titre:'🎉 Approbation',sujet:'🎉 Félicitations — Votre hypothèque est approuvée!',corps:`Bonjour [Prénom],\n\nExcellente nouvelle : votre hypothèque est approuvée!\n\n• Montant : [Montant]\n• Taux : [Taux]%\n• Amortissement : [Durée] ans\n\nProchaine étape : signature chez le notaire le [Date].\n\nFélicitations! 🏡\n[Votre nom]`},
+  {titre:'🔔 Relance documents',sujet:'Rappel — Documents manquants',corps:`Bonjour [Prénom],\n\nJe vous relance pour les documents encore manquants :\n\n❌ [Documents manquants]\n\nMerci de me les envoyer dès que possible pour ne pas retarder votre dossier.\n\n[Votre nom]`},
+  {titre:'⭐ Demande de référence',sujet:'Votre expérience — Un service à partager?',corps:`Bonjour [Prénom],\n\nJ'espère que tout se passe bien dans votre nouvelle propriété!\n\nSi vous avez été satisfait(e), n'hésitez pas à me référer à vos proches.\n\nMerci de votre confiance!\n[Votre nom] · [Téléphone]`},
+  {titre:'📱 SMS — Bienvenue',sujet:'[SMS] Premier contact',corps:`Bonjour [Prénom]! C'est [Votre nom], votre courtier hypothécaire. Je viens de créer votre dossier. Je vous envoie la liste de documents par courriel. Parlez-en bientôt! 📱`},
+  {titre:'🏠 Renouvellement (J-90)',sujet:'Votre hypothèque arrive à renouvellement — Agissons maintenant',corps:`Bonjour [Prénom],\n\nVotre hypothèque arrive à échéance dans environ 90 jours.\n\nC'est le bon moment pour comparer les options du marché — vous pourriez économiser des milliers de dollars!\n\nPouvons-nous planifier un appel de 15 minutes cette semaine?\n\n[Votre nom]\nCourtier hypothécaire agréé`},
+];
+
+// ============ AUTH ============
+async function initAuth(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session)showApp(session.user);
+  sb.auth.onAuthStateChange((e,s)=>{if(s)showApp(s.user);else showAuthScreen()});
+}
+function showApp(user){
+  currentUser=user;
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+  document.getElementById('user-email-display').textContent=user.email;
+  loadAll();
+}
+function showAuthScreen(){currentUser=null;document.getElementById('auth-screen').style.display='flex';document.getElementById('app-screen').style.display='none'}
+function switchAuthTab(tab,el){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-signup').style.display=tab==='signup'?'block':'none';
+}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pw=document.getElementById('login-password').value;
+  const err=document.getElementById('login-error');
+  err.classList.remove('show');
+  if(!email||!pw){err.textContent='Veuillez remplir tous les champs.';err.classList.add('show');return}
+  const{error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error){err.textContent='Courriel ou mot de passe incorrect.';err.classList.add('show')}
+}
+async function doSignup(){
+  const email=document.getElementById('signup-email').value.trim();
+  const pw=document.getElementById('signup-password').value;
+  const conf=document.getElementById('signup-confirm').value;
+  const err=document.getElementById('signup-error');
+  const suc=document.getElementById('signup-success');
+  err.classList.remove('show');suc.classList.remove('show');
+  if(!email||!pw){err.textContent='Veuillez remplir tous les champs.';err.classList.add('show');return}
+  if(pw.length<8){err.textContent='Mot de passe minimum 8 caractères.';err.classList.add('show');return}
+  if(pw!==conf){err.textContent='Les mots de passe ne correspondent pas.';err.classList.add('show');return}
+  const{error}=await sb.auth.signUp({email,password:pw});
+  if(error){err.textContent=error.message;err.classList.add('show')}
+  else{suc.textContent='✅ Compte créé! Vérifiez votre courriel.';suc.classList.add('show')}
+}
+async function doReset(){
+  const email=document.getElementById('login-email').value.trim();
+  if(!email){const e=document.getElementById('login-error');e.textContent="Entrez votre courriel d'abord.";e.classList.add('show');return}
+  await sb.auth.resetPasswordForEmail(email);
+  showNotif('📧 Courriel de réinitialisation envoyé!');
+}
+async function doLogout(){await sb.auth.signOut();dossiers=[];rappels=[]}
+
+// ============ DATA ============
+async function loadAll(){
+  await Promise.all([loadDossiers(),loadRappels()]);
+  renderDashboard();
+}
+async function loadDossiers(){
+  const{data,error}=await sb.from('dossiers').select('*').order('created_at',{ascending:false});
+  if(!error)dossiers=data||[];
+}
+async function loadRappels(){
+  const{data,error}=await sb.from('rappels').select('*').order('created_at',{ascending:false});
+  if(!error)rappels=data||[];
+}
+
+// ============ NAV ============
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Tableau de bord',pipeline:'Pipeline des dossiers',clients:'Tous les clients',boss:'Intégration BOSS',calculateur:'Calculateur hypothécaire',commissions:'Suivi des commissions',analytics:'Analytique avancée',sequences:'Séquences automatiques',rappels:'Rappels & Tâches',emails:"Modèles d'emails",equipe:'Mon équipe',settings:'Paramètres'};
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(id==='pipeline')renderKanban();
+  if(id==='clients')renderClientsTable(dossiers);
+  if(id==='rappels')renderRappels();
+  if(id==='emails')renderEmails();
+  if(id==='equipe')renderEquipe();
+  if(id==='dashboard')renderDashboard();
+  if(id==='analytics'){setTimeout(renderAnalytics,100)}
+  if(id==='commissions')renderCommissions();
+  if(id==='calculateur')calcMortgage();
+}
+
+// ============ MODALS ============
+function openNewDossier(){
+  editingId=null;
+  document.getElementById('modal-dossier-title').textContent='Nouveau dossier';
+  ['f-prenom','f-nom','f-email','f-tel','f-montant','f-adresse','f-revenu','f-mdf','f-taux','f-preteur','f-commission','f-dossier-no','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('f-type').value='achat';
+  document.getElementById('f-statut').value='prospect';
+  document.getElementById('f-source').value='manuel';
+  renderDocChecklist({});
+  switchTab('info',document.querySelector('.tab'));
+  openModal('modal-dossier');
+}
+function openEditDossier(id){
+  const d=dossiers.find(x=>x.id===id);if(!d)return;
+  editingId=id;
+  document.getElementById('modal-dossier-title').textContent='Modifier — '+d.prenom+' '+d.nom;
+  const fields={prenom:'f-prenom',nom:'f-nom',email:'f-email',tel:'f-tel',montant:'f-montant',adresse:'f-adresse',revenu:'f-revenu',mdf:'f-mdf',taux:'f-taux',preteur:'f-preteur',commission:'f-commission',notes:'f-notes'};
+  Object.entries(fields).forEach(([k,v])=>{const el=document.getElementById(v);if(el)el.value=d[k]||''});
+  document.getElementById('f-type').value=d.type||'achat';
+  document.getElementById('f-statut').value=d.statut||'prospect';
+  document.getElementById('f-agent').value=d.agent||'Marie Côté';
+  document.getElementById('f-source').value=d.source||'manuel';
+  renderDocChecklist(d.docs||{});
+  switchTab('info',document.querySelector('.tab'));
+  openModal('modal-dossier');
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openNewRappel(){
+  document.getElementById('r-titre').value='';
+  document.getElementById('r-date').value='';
+  document.getElementById('r-note').value='';
+  document.getElementById('r-urgence').value='med';
+  const sel=document.getElementById('r-dossier');
+  sel.innerHTML='<option value="">— Aucun —</option>';
+  dossiers.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=d.prenom+' '+d.nom;sel.appendChild(o)});
+  openModal('modal-rappel');
+}
+
+// ============ SAVE ============
+async function saveDossier(){
+  const prenom=document.getElementById('f-prenom').value.trim();
+  const nom=document.getElementById('f-nom').value.trim();
+  if(!prenom||!nom){showNotif('⚠️ Veuillez entrer le nom du client');return}
+  const docs={};
+  document.querySelectorAll('#docs-checklist .check-item input[type=checkbox]').forEach((cb,i)=>{docs[DOCS_REQUIS[i]]=cb.checked});
+  const btn=document.getElementById('btn-save-dossier');
+  btn.innerHTML='<span class="spinner"></span>Enregistrement...';btn.disabled=true;
+  const montantNum=parseFloat((document.getElementById('f-montant').value||'').replace(/[^0-9.]/g,''))||0;
+  const commissionAuto=montantNum>0?(montantNum*commTaux/100).toFixed(0):'';
+  const payload={prenom,nom,
+    email:document.getElementById('f-email').value,
+    tel:document.getElementById('f-tel').value,
+    montant:document.getElementById('f-montant').value,
+    type:document.getElementById('f-type').value,
+    statut:document.getElementById('f-statut').value,
+    agent:document.getElementById('f-agent').value,
+    source:document.getElementById('f-source').value,
+    adresse:document.getElementById('f-adresse').value,
+    revenu:document.getElementById('f-revenu').value,
+    mdf:document.getElementById('f-mdf').value,
+    taux:document.getElementById('f-taux').value,
+    preteur:document.getElementById('f-preteur').value,
+    commission:document.getElementById('f-commission').value||commissionAuto,
+    notes:document.getElementById('f-notes').value,
+    docs,user_id:currentUser.id,
+  };
+  let error;
+  if(editingId){({error}=await sb.from('dossiers').update(payload).eq('id',editingId))}
+  else{({error}=await sb.from('dossiers').insert(payload))}
+  btn.innerHTML='💾 Enregistrer';btn.disabled=false;
+  if(error){showNotif('❌ Erreur: '+error.message);return}
+  await loadDossiers();
+  closeModal('modal-dossier');
+  showNotif('✅ Dossier enregistré');
+  renderDashboard();renderKanban();renderClientsTable(dossiers);
+}
+async function deleteDossier(id){
+  if(!confirm('Supprimer ce dossier définitivement?'))return;
+  await sb.from('dossiers').delete().eq('id',id);
+  await loadDossiers();
+  renderClientsTable(dossiers);renderKanban();renderDashboard();
+  showNotif('🗑️ Dossier supprimé');
+}
+async function saveRappel(){
+  const titre=document.getElementById('r-titre').value.trim();
+  if(!titre){showNotif('⚠️ Veuillez entrer un titre');return}
+  const btn=document.getElementById('btn-save-rappel');
+  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  const dossierId=document.getElementById('r-dossier').value;
+  const{error}=await sb.from('rappels').insert({titre,date:document.getElementById('r-date').value||null,urgence:document.getElementById('r-urgence').value,dossier_id:dossierId||null,note:document.getElementById('r-note').value,done:false,user_id:currentUser.id});
+  btn.innerHTML='💾 Enregistrer';btn.disabled=false;
+  if(error){showNotif('❌ Erreur: '+error.message);return}
+  await loadRappels();closeModal('modal-rappel');showNotif('✅ Rappel ajouté');renderRappels();renderDashboard();
+}
+async function toggleRappel(id){
+  const r=rappels.find(x=>x.id===id);if(!r)return;
+  await sb.from('rappels').update({done:!r.done}).eq('id',id);
+  await loadRappels();renderRappels();
+}
+async function deleteRappel(id){
+  await sb.from('rappels').delete().eq('id',id);
+  await loadRappels();renderRappels();
+}
+
+// ============ RENDER ============
+function renderDashboard(){
+  document.getElementById('s-actifs').textContent=dossiers.filter(d=>d.statut!=='finance'&&d.statut!=='perdu').length;
+  document.getElementById('s-approuves').textContent=dossiers.filter(d=>d.statut==='approuve').length;
+  document.getElementById('s-boss').textContent=dossiers.filter(d=>d.source==='boss').length;
+  const totalComm=dossiers.filter(d=>d.statut==='finance'&&d.commission).reduce((s,d)=>s+parseFloat(d.commission||0),0);
+  document.getElementById('s-commissions').textContent=totalComm>0?fmt(totalComm)+'$':'—';
+  const recent=document.getElementById('recent-activity');
+  recent.innerHTML=dossiers.length===0?'<div class="empty-state"><div class="empty-icon">📁</div><div>Aucun dossier</div></div>'
+    :dossiers.slice(0,5).map(d=>`<div style="display:flex;align-items:center;gap:10px;background:var(--navy2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;cursor:pointer;margin-bottom:8px" onclick="openEditDossier('${d.id}')">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'DM Serif Display',serif;font-size:13px;flex-shrink:0">${(d.prenom||'?')[0]}${(d.nom||'?')[0]}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--cream)">${d.prenom} ${d.nom}</div><div style="font-size:11px;color:var(--text-dim)">${d.montant||'—'} · ${d.agent||'—'}${d.source==='boss'?' · <span style="color:var(--teal)">BOSS</span>':''}</div></div>
+      <span class="status-badge ${STATUTS[d.statut]?.cls}">${STATUTS[d.statut]?.label}</span></div>`).join('');
+  const urgentDiv=document.getElementById('urgent-reminders');
+  const urgents=rappels.filter(r=>!r.done&&r.urgence==='high').slice(0,4);
+  urgentDiv.innerHTML=urgents.length===0?'<div class="empty-state"><div class="empty-icon">✅</div><div>Aucun rappel urgent</div></div>'
+    :urgents.map(r=>`<div style="display:flex;align-items:center;gap:10px;background:rgba(240,106,106,.08);border:1px solid rgba(240,106,106,.2);border-radius:9px;padding:11px 13px;margin-bottom:8px">
+      <span style="font-size:16px">🔴</span>
+      <div><div style="font-size:13px;font-weight:500;color:var(--cream)">${r.titre}</div><div style="font-size:11px;color:var(--text-dim)">${r.date||'Sans date'}</div></div></div>`).join('');
+}
+
+function renderKanban(){
+  const board=document.getElementById('kanban-board');board.innerHTML='';
+  Object.entries(STATUTS).forEach(([key,s])=>{
+    const col=dossiers.filter(d=>d.statut===key);
+    const colEl=document.createElement('div');colEl.className='kanban-col';
+    colEl.innerHTML=`<div class="kanban-header"><div class="kanban-title"><div class="kanban-dot" style="background:${s.dot}"></div>${s.label}</div><div class="kanban-count">${col.length}</div></div>
+    <div class="kanban-body">${col.length===0?'<div style="text-align:center;color:var(--text-dim);font-size:12px;padding:20px">Aucun dossier</div>'
+      :col.map(d=>{
+        const total=DOCS_REQUIS.length;const done=Object.values(d.docs||{}).filter(Boolean).length;const pct=Math.round((done/total)*100);
+        const tTag={achat:'tag-achat',refi:'tag-refi',renou:'tag-renou'}[d.type]||'tag-achat';
+        const tLabel={achat:'Achat',refi:'Refinancement',renou:'Renouvellement'}[d.type]||d.type;
+        return`<div class="kanban-card" onclick="openEditDossier('${d.id}')">
+          <div class="card-name">${d.prenom} ${d.nom}</div>
+          <div class="card-amount">${d.montant||'—'}</div>
+          <div class="card-meta"><span class="card-agent">👤 ${(d.agent||'').split(' ')[0]}</span><span class="card-date">📅 ${(d.date||d.created_at||'').slice(0,10)}</span></div>
+          <div class="card-tags"><span class="tag ${tTag}">${tLabel}</span>${d.source==='boss'?'<span class="tag tag-boss">BOSS</span>':''}</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px">📂 ${done}/${total} docs</div></div>`;
+      }).join('')}</div>`;
+    board.appendChild(colEl);
+  });
+}
+
+function renderClientsTable(data){
+  const tbody=document.getElementById('clients-tbody');
+  const tl={achat:'Achat',refi:'Refinancement',renou:'Renouvellement'};
+  const sl={manuel:'Manuel',boss:'🔗 BOSS',referral:'⭐ Référence',web:'🌐 Web',reseau:'🤝 Réseau'};
+  tbody.innerHTML=data.length===0?`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim)">Aucun client</td></tr>`
+    :data.map(d=>`<tr>
+      <td><div style="font-weight:600;color:var(--cream)">${d.prenom} ${d.nom}</div><div style="font-size:11px;color:var(--text-dim)">${d.email||''}</div></td>
+      <td>${tl[d.type]||d.type||'—'}</td>
+      <td style="color:var(--gold);font-weight:500">${d.montant||'—'}</td>
+      <td><span class="status-badge ${STATUTS[d.statut]?.cls}">${STATUTS[d.statut]?.label||d.statut}</span></td>
+      <td>${d.agent||'—'}</td>
+      <td>${sl[d.source]||d.source||'—'}</td>
+      <td>${(d.date||d.created_at||'').slice(0,10)}</td>
+      <td style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-sm" onclick="openEditDossier('${d.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDossier('${d.id}')">🗑️</button>
+      </td></tr>`).join('');
+}
+
+function renderDocChecklist(existing){
+  document.getElementById('docs-checklist').innerHTML=DOCS_REQUIS.map((doc,i)=>{
+    const checked=existing[doc]||false;
+    return`<div class="check-item">
+      <input type="checkbox" id="doc-${i}" ${checked?'checked':''} onchange="updateDocLabel(${i},this.checked)">
+      <span class="check-label ${checked?'done':''}" id="doc-label-${i}">${doc}</span>
+      <span class="check-status ${checked?'check-ok':'check-missing'}" id="doc-status-${i}">${checked?'✅ Reçu':'⏳ Manquant'}</span>
+    </div>`;
+  }).join('');
+}
+function updateDocLabel(i,checked){
+  document.getElementById('doc-label-'+i).className='check-label'+(checked?' done':'');
+  const s=document.getElementById('doc-status-'+i);
+  s.className='check-status '+(checked?'check-ok':'check-missing');
+  s.textContent=checked?'✅ Reçu':'⏳ Manquant';
+}
+
+function renderRappels(){
+  const el=document.getElementById('reminder-list');
+  const ul={high:'urgency-high',med:'urgency-med',low:'urgency-low'};
+  const ll={high:'🔴 Urgent',med:'🟠 Moyen',low:'🟢 Normal'};
+  el.innerHTML=rappels.length===0?'<div class="empty-state"><div class="empty-icon">🔔</div><div>Aucun rappel</div></div>'
+    :rappels.map(r=>{
+      const d=dossiers.find(x=>x.id===r.dossier_id);
+      return`<div class="reminder-item" style="${r.done?'opacity:.5':''}">
+        <span style="font-size:18px;flex-shrink:0">${r.done?'✅':'🔔'}</span>
+        <div class="reminder-content">
+          <div class="reminder-title" style="${r.done?'text-decoration:line-through':''}">${r.titre}</div>
+          <div class="reminder-meta">${r.date||'Sans date'}${d?' · '+d.prenom+' '+d.nom:''}${r.note?' · '+r.note:''}</div>
+        </div>
+        <span class="urgency-badge ${ul[r.urgence]}">${ll[r.urgence]}</span>
+        <div style="display:flex;gap:5px;margin-left:8px">
+          <button class="btn btn-ghost btn-sm" onclick="toggleRappel('${r.id}')">${r.done?'↩️':'✅'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRappel('${r.id}')">🗑️</button>
+        </div></div>`;
+    }).join('');
+}
+
+function renderEmails(){
+  document.getElementById('email-templates-list').innerHTML=EMAIL_TEMPLATES.map((t,i)=>`
+    <div class="email-template">
+      <div class="email-template-header">
+        <div class="email-template-title">${t.titre}</div>
+        <button class="btn btn-primary btn-sm" onclick="previewEmail(${i})">👁️ Voir & Copier</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">📌 ${t.sujet}</div>
+      <div class="email-preview">${t.corps.slice(0,100)}...</div>
+    </div>`).join('');
+}
+function previewEmail(i){
+  const t=EMAIL_TEMPLATES[i];
+  document.getElementById('email-modal-title').textContent=t.titre;
+  document.getElementById('email-subject-display').value=t.sujet;
+  document.getElementById('email-body-display').value=t.corps;
+  openModal('modal-email');
+}
+function copyEmail(){
+  const s=document.getElementById('email-subject-display').value;
+  const b=document.getElementById('email-body-display').value;
+  navigator.clipboard.writeText('Sujet : '+s+'\n\n'+b).then(()=>showNotif('📋 Email copié!'));
+}
+
+function renderEquipe(){
+  document.getElementById('team-grid').innerHTML=EQUIPE.map(m=>{
+    const myD=dossiers.filter(d=>d.agent===m.nom);
+    const app=myD.filter(d=>d.statut==='approuve'||d.statut==='finance').length;
+    return`<div class="team-card">
+      <div class="team-avatar">${m.initiale}</div>
+      <div class="team-name">${m.nom}</div>
+      <div class="team-role">${m.role}</div>
+      <div class="team-stats">
+        <div class="team-stat"><div class="team-stat-val">${myD.length}</div><div class="team-stat-label">Dossiers</div></div>
+        <div class="team-stat"><div class="team-stat-val">${app}</div><div class="team-stat-label">Approuvés</div></div>
+      </div></div>`;
+  }).join('');
+}
+
+function renderCommissions(){
+  const financed=dossiers.filter(d=>d.statut==='finance'&&d.commission);
+  const pending=dossiers.filter(d=>d.statut==='approuve');
+  const totalFin=financed.reduce((s,d)=>s+parseFloat(d.commission||0),0);
+  const totalPend=pending.reduce((s,d)=>{
+    const m=parseFloat((d.montant||'').replace(/[^0-9.]/g,''))||0;
+    return s+(m*commTaux/100);
+  },0);
+  document.getElementById('comm-total').textContent=totalFin>0?fmt(totalFin)+'$':'0$';
+  document.getElementById('comm-pending').textContent=totalPend>0?fmt(totalPend)+'$':'0$';
+  const all=[...financed,...pending];
+  document.getElementById('commissions-list').innerHTML=all.length===0?'<div class="empty-state"><div class="empty-icon">💰</div><div>Aucune commission</div></div>'
+    :all.map(d=>{
+      const m=parseFloat((d.montant||'').replace(/[^0-9.]/g,''))||0;
+      const comm=d.commission||(m*commTaux/100).toFixed(0);
+      return`<div class="commission-card">
+        <div class="commission-info">
+          <div class="commission-client">${d.prenom} ${d.nom}</div>
+          <div class="commission-detail">${d.montant||'—'} · ${d.agent||'—'} · <span class="status-badge ${STATUTS[d.statut]?.cls}">${STATUTS[d.statut]?.label}</span></div>
+        </div>
+        <div class="commission-amount">${comm?fmt(parseFloat(comm))+'$':'—'}</div>
+      </div>`;
+    }).join('');
+}
+function saveCommSettings(){
+  commTaux=parseFloat(document.getElementById('comm-taux-input').value)||1.0;
+  showNotif('✅ Paramètres de commission sauvegardés');
+  renderCommissions();
+}
+
+// ============ ANALYTICS ============
+let charts={};
+function renderAnalytics(){
+  const vol=dossiers.reduce((s,d)=>{const m=parseFloat((d.montant||'').replace(/[^0-9.]/g,''))||0;return s+m},0);
+  document.getElementById('a-volume').textContent=vol>0?fmtM(vol):'—';
+  const fin=dossiers.filter(d=>d.statut==='finance').length;
+  const conv=dossiers.length>0?Math.round((fin/dossiers.length)*100):0;
+  document.getElementById('a-conv').textContent=conv+'%';
+  document.getElementById('a-delai').textContent='~21j';
+  document.getElementById('a-dpm').textContent=dossiers.length>0?Math.max(1,Math.round(dossiers.length/3)):'—';
+  const cfg={plugins:{legend:{labels:{color:'#d4cfc6',font:{size:12}}}},scales:{x:{ticks:{color:'#7a8494'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#7a8494'},grid:{color:'rgba(255,255,255,0.05)'}}}};
+  const doughnutCfg={plugins:{legend:{position:'right',labels:{color:'#d4cfc6',font:{size:11}}}}};
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+  const statCounts=Object.keys(STATUTS).map(k=>dossiers.filter(d=>d.statut===k).length);
+  charts.statuts=new Chart(document.getElementById('chart-statuts'),{type:'doughnut',data:{labels:Object.values(STATUTS).map(s=>s.label),datasets:[{data:statCounts,backgroundColor:['#5b8dee','#f0a050','#a78bfa','#3ecf8e','#c9a84c','#f06a6a'],borderWidth:0}]},options:{...doughnutCfg,cutout:'65%'}});
+  const types=['achat','refi','renou'];
+  charts.types=new Chart(document.getElementById('chart-types'),{type:'doughnut',data:{labels:['Achat','Refinancement','Renouvellement'],datasets:[{data:types.map(t=>dossiers.filter(d=>d.type===t).length),backgroundColor:['#5b8dee','#a78bfa','#f0a050'],borderWidth:0}]},options:{...doughnutCfg,cutout:'65%'}});
+  charts.agents=new Chart(document.getElementById('chart-agents'),{type:'bar',data:{labels:EQUIPE.map(e=>e.nom.split(' ')[0]),datasets:[{label:'Dossiers',data:EQUIPE.map(e=>dossiers.filter(d=>d.agent===e.nom).length),backgroundColor:'#c9a84c',borderRadius:6}]},options:{...cfg,plugins:{legend:{display:false}}}});
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun'];
+  charts.volume=new Chart(document.getElementById('chart-volume'),{type:'line',data:{labels:months,datasets:[{label:'Volume ($)',data:[820000,650000,940000,1100000,880000,vol||750000],borderColor:'#3ecf8e',backgroundColor:'rgba(62,207,142,0.1)',tension:.4,fill:true,pointBackgroundColor:'#3ecf8e'}]},options:{...cfg}});
+}
+
+// ============ CALCULATEUR ============
+function calcMortgage(){
+  const P=parseFloat(document.getElementById('c-montant').value)||0;
+  const mdf=parseFloat(document.getElementById('c-mdf').value)||0;
+  const principal=P-mdf;
+  const annualRate=parseFloat(document.getElementById('c-taux').value)||0;
+  const years=parseInt(document.getElementById('c-amort').value)||25;
+  const freq=parseInt(document.getElementById('c-freq').value)||12;
+  const r=(annualRate/100)/freq;
+  const n=years*freq;
+  if(principal<=0||annualRate<=0){return}
+  const payment=r===0?principal/n:principal*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+  const totalPaid=payment*n;
+  const totalInterest=totalPaid-principal;
+  const freqLabel={12:'mensuel',26:'bi-hebdomadaire',52:'hebdomadaire'}[freq];
+  document.getElementById('r-paiement').textContent=fmt(payment)+'$';
+  document.getElementById('r-total').textContent=fmtM(totalPaid);
+  document.getElementById('r-interet').textContent=fmtM(totalInterest);
+  document.getElementById('calc-breakdown').innerHTML=`
+    <div class="calc-row"><span>Montant hypothèque</span><span>${fmt(P)}$</span></div>
+    <div class="calc-row"><span>Mise de fonds</span><span>${fmt(mdf)}$</span></div>
+    <div class="calc-row"><span>Principal emprunté</span><span>${fmt(principal)}$</span></div>
+    <div class="calc-row"><span>Taux d'intérêt</span><span>${annualRate}%</span></div>
+    <div class="calc-row"><span>Amortissement</span><span>${years} ans</span></div>
+    <div class="calc-row"><span>Paiement ${freqLabel}</span><span>${fmt(payment)}$</span></div>
+    <div class="calc-row"><span>Total des intérêts</span><span>${fmtM(totalInterest)}</span></div>
+    <div class="calc-row"><span>Ratio prêt/valeur</span><span>${Math.round((principal/P)*100)}%</span></div>`;
+}
+function saveToDossier(){showNotif('💾 Calcul prêt à être intégré dans un dossier — sélectionnez le dossier dans Pipeline')}
+function printCalc(){window.print()}
+
+// ============ BOSS ============
+function saveBossConfig(){
+  const key=document.getElementById('boss-api-key').value;
+  const url=document.getElementById('boss-url').value;
+  if(!key){showNotif('⚠️ Entrez votre clé API BOSS');return}
+  localStorage.setItem('boss_api_key','***');
+  localStorage.setItem('boss_url',url);
+  document.getElementById('boss-status-badge').className='boss-status boss-connected';
+  document.getElementById('boss-status-badge').innerHTML='<div class="boss-dot boss-dot-on"></div>Connecté';
+  showNotif('✅ Configuration BOSS sauvegardée');
+}
+function testBossConnection(){showNotif('🧪 Test de connexion... Contactez BOSS pour confirmer votre clé API')}
+function copyWebhook(){
+  navigator.clipboard.writeText('https://votre-crm.vercel.app/api/boss-webhook').then(()=>showNotif('📋 URL webhook copiée!')}
+}
+function importBossLead(lead){
+  editingId=null;
+  document.getElementById('f-prenom').value=lead.prenom||'';
+  document.getElementById('f-nom').value=lead.nom||'';
+  document.getElementById('f-montant').value=lead.montant||'';
+  document.getElementById('f-type').value=lead.type||'achat';
+  document.getElementById('f-statut').value='prospect';
+  document.getElementById('f-source').value='boss';
+  renderDocChecklist({});
+  switchTab('info',document.querySelector('.tab'));
+  openModal('modal-dossier');
+  showNotif('🔗 Lead BOSS importé — complétez et sauvegardez');
+}
+
+// ============ SETTINGS ============
+function openNewField(){showNotif('Fonctionnalité disponible dans la prochaine mise à jour!')}
+function openNewSequence(){showNotif('Éditeur de séquences — disponible dans la prochaine mise à jour!')}
+
+// ============ TABS ============
+function switchTab(id,el){
+  const container=el?el.closest('.modal-body')||el.parentElement.parentElement:document.querySelector('.modal-overlay.open .modal-body');
+  if(!container)return;
+  container.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  container.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  const tc=container.querySelector('#tab-'+id);
+  if(tc)tc.classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+// ============ SEARCH ============
+function handleSearch(val){
+  const q=val.toLowerCase();
+  if(!q)return;
+  const filtered=dossiers.filter(d=>(d.prenom+' '+d.nom).toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||(d.montant||'').includes(q));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-clients').classList.add('active');
+  document.getElementById('page-title').textContent=`Résultats : "${val}"`;
+  renderClientsTable(filtered);
+}
+
+// ============ UTILS ============
+function fmt(n){return Math.round(n).toLocaleString('fr-CA')}
+function fmtM(n){return n>=1000000?(n/1000000).toFixed(1)+'M$':fmt(n)+'$'}
+function showNotif(msg){
+  const n=document.getElementById('notif');
+  document.getElementById('notif-text').textContent=msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+// INIT
+initAuth();
+</script>
+
+
+</body></html>
